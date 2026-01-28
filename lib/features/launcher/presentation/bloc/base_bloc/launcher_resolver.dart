@@ -1,14 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:micro_app_commons/features/launcher/presentation/bloc/base_bloc/launcher_events.dart';
 import 'package:micro_app_commons/features/launcher/presentation/launcher_page.dart';
-import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
-import 'package:micro_app_core/services/routing/routing_transitions.dart';
-import 'package:micro_app_core/src/micro_app.dart' as microApp;
-import 'package:micro_app_core/src/micro_core_utils.dart';
+// ignore: unused_import
+import 'package:micro_app_core/index.dart' as prefix0;
+import 'package:micro_app_core/index.dart';
 
 import 'launcher_inject.dart';
 
-class LauncherResolver implements microApp.MicroApp {
+class LauncherResolver extends MicroApp {
+  LauncherResolver() : super(SignInCoreModel(onLogIn: () {}, onLogOut: () {})) {
+    initDatas = SignInCoreModel(onLogIn: () {}, onLogOut: () {});
+  }
+
   @override
   String get microAppName => "/notFound";
 

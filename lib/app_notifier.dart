@@ -1,86 +1,217 @@
 // ==================== GLOBAL NOTIFIER ====================
+import 'dart:async';
 import 'dart:core';
 
 import 'package:erp_app/micro_app/erp_events.dart';
 import 'package:flutter/material.dart';
 import 'package:login_module/micro_app/login_module_events.dart';
-import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
+import 'package:micro_app_core/index.dart';
 import 'package:micro_app_core/services/routing/route_events.dart';
-import 'package:micro_app_core/services/routing/routes.dart';
-import 'package:models_package/Base/login_module.dart';
+import 'package:micro_app_core/utils/models/core_dto.dart';
+import 'package:models_package/index.dart';
 import 'package:resources_package/Resources/Theme/theme_manager.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
+// ==================== کلاس پایه AppNotifier ====================
 class AppNotifier extends ChangeNotifier {
-  // AppNotifier() {
-  //   _loadDefaultMenu();
-  // }
-
   // ==================== STATE ====================
-  final Map<String, Widget> _generatedPages = <String, Widget>{};
+  final Map<int, Widget> _pageCache = {};
+  final Map<int, bool> _showSkeleton = {};
+  final Map<int, Timer> _skeletonTimers = {};
+  late final PageCacheManager _cacheManager = PageCacheManager(
+    maxAge: const Duration(minutes: 5),
+  );
 
+  bool _isProcessingSignOut = false;
+  final Map<String, Widget> _generatedPages = <String, Widget>{};
+  NavButtonTabBarMode _selectedTab = NavButtonTabBarMode.erpDashboardTabMode;
   final bool _isMenuLoading = false;
+
   String? _errorMessage;
   ThemeManager _themeConfig = ThemeManager();
   String? _selectedItemId;
+  // ignore: prefer_final_fields
   bool _sidebarCollapsed = false;
   bool _isDrawerOpen = false;
   bool _isLogin = true;
-  final LoginModuleResult _currentLoginModuleResult = LoginModuleResult.failure('');
+
+  Map<int, Widget> get pageCache => Map.from(_pageCache);
+
   bool _isLoading = false;
-  final bool _isPopop = false;
+  // ignore: unused_field
+  int _netMode = 0;
+  final bool _isPopup = false;
+  static final Map<String, bool> _defValue = {'first': false};
+  final Map<String, bool> _isListRoute = _defValue;
+  final Map<String, bool> _isFormRoute = _defValue;
+  // ignore: unused_field
+  final List<String> _errors = [];
   String? _userName;
   String? _userEmail;
   String? _userRole;
-  int _netMode = 0;
-  Locale _currentLocale = Locale('fa');
+  // ignore: unused_field
   String? _deviceToken;
+  Locale _currentLocale = Locale('fa');
   final Map<String, bool> _expandedStates = <String, bool>{};
   String? _currentRoute;
+  final List<Completer<void>> _pendingOperations = [];
 
-  /// Current emitted event (intention). Micro-apps should register builders
-  /// with [MicroAppWidgetRegistry] so the UI can resolve a widget for this
-  /// event and show it inside the detail pane (IndexedStack in ContentWrapper).
+  // ==================== CORE METHODS ====================
+  void pageCacheProvider({NavButtonTabBarMode? initialTab}) {
+    _selectedTab = initialTab ?? NavButtonTabBarMode.erpDashboardTabMode;
+  }
+
   RouteEvent? _currentEvent;
 
   RouteEvent? get currentEvent => _currentEvent;
 
-  // ==================== MENU HELPERS ====================
   void emit(RouteEvent event) {
     _currentEvent = event;
     CustomEventBus.emit(event);
     notifyListeners();
   }
 
-  // void _assignPageToMenuItem(MenuItemModel item) {
-  //   if (item.routeName != null) item.page = getPageByRout(item.routeName!);
-  //
-  //   if (item.children != null) {
-  //     for (final MenuItemModel child in item.children!) {
-  //       _assignPageToMenuItem(child);
-  //     }
-  //   }
-  // }
-
-  Routes getRoutesByNme(String name) {
-    switch (name.toLowerCase()) {
-      case 'purchase':
-        return Routes.erpApp;
-      case 'profile':
-        return Routes.loginApp;
-      default:
-        return Routes.erpApp;
-    }
+  // ==================== PAGE MANAGEMENT ====================
+  @protected
+  Widget createRawPage(NavButtonTabBarMode tab) {
+    return _defaultPage(tab);
   }
 
-  // ==================== NAVIGATION ====================
-
-  void toggleExpanded(String itemId) {
-    _expandedStates[itemId] = !isExpanded(itemId);
+  void changePage(
+    PageType pageType, {
+    String? route,
+    NavButtonTabBarMode? tab,
+  }) {
+    // _pageType = pageType; // اگر فیلد _pageType را دارید
+    if (pageType == PageType.tabBar) {
+      if (tab != null) {
+        _selectedTab = tab;
+      }
+    } else if (route != null &&
+        route != '' &&
+        pageType == PageType.listGenerator) {
+      _isListRoute[route] = true;
+    } else if (route != null &&
+        route != '' &&
+        pageType == PageType.formGenerator) {
+      _isFormRoute[route] = true;
+    } else {}
     notifyListeners();
   }
 
-  void selectItem(String itemId, {bool closeDrawer = true}) {}
+  Future<void> signOut(BuildContext context, {bool force = false}) async {
+    if (_isProcessingSignOut) return;
 
+    _isProcessingSignOut = true;
+
+    // NotifService().signOut(context, reason: 'خروج از ERP', toParent: true);
+
+    // ignore: unused_local_variable, no_leading_underscores_for_local_identifiers
+    var _isSignOut = true;
+    notifyListeners();
+  }
+
+  Widget _defaultPage(NavButtonTabBarMode tab) {
+    return Center(child: Text('صفحه ${tab.value}'));
+  }
+
+  Widget getPage(NavButtonTabBarMode tab, {bool forceRefresh = false}) {
+    if (_isProcessingSignOut) {
+      return _buildSignOutScreen();
+    }
+
+    // Dashboard tab - special logic
+    if (tab == NavButtonTabBarMode.erpDashboardTabMode) {
+      return const Text('Dashboard');
+    }
+
+    // Check cache
+    if (!forceRefresh &&
+        (tab == NavButtonTabBarMode.skeletion ||
+            _pageCache.containsKey(tab.value))) {
+      final showSkeleton = _showSkeleton[tab.value] ?? false;
+      final cachedPage = _pageCache[tab.value];
+      if (cachedPage != null) {
+        return _wrapWithSkeleton(
+          cachedPage,
+          tab.value,
+          showSkeleton: showSkeleton,
+        );
+      }
+    }
+
+    // Create new page
+    final rawPage = _cacheManager.getOrCreate(
+      tab.value,
+      () => createRawPage(tab),
+    );
+
+    // Cache it
+    _pageCache[tab.value] = rawPage;
+
+    // Activate skeleton
+    _activateSkeleton(tab.value);
+
+    return _wrapWithSkeleton(rawPage, tab.value, showSkeleton: true);
+  }
+
+  // ==================== SKELETON & CACHE HELPERS ====================
+  void _activateSkeleton(int tabValue) {
+    _showSkeleton[tabValue] = true;
+    _skeletonTimers[tabValue]?.cancel();
+
+    final timer = Timer(const Duration(milliseconds: 400), () {
+      if (!_isProcessingSignOut) {
+        _showSkeleton[tabValue] = false;
+        notifyListeners();
+      }
+    });
+
+    _skeletonTimers[tabValue] = timer;
+  }
+
+  Widget _wrapWithSkeleton(
+    Widget page,
+    int tabValue, {
+    required bool showSkeleton,
+  }) {
+    return Skeletonizer(
+      containersColor: Colors.white,
+      enabled: showSkeleton && !_isProcessingSignOut,
+      child: page,
+    );
+  }
+
+  Widget _buildSignOutScreen() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              'در حال خروج از برنامه...',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'لغو ${_pendingOperations.length} عملیات در حال اجرا',
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void clearPageCache() {
+    _pageCache.clear();
+    _generatedPages.clear();
+    notifyListeners();
+  }
+
+  // ==================== NAVIGATION ====================
   void navigateTo(String routeName) {
     _currentRoute = routeName;
     final RouteEvent? ev = _mapRouteToEvent(routeName);
@@ -91,158 +222,36 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearPageCache() {
-    _generatedPages.clear();
-    notifyListeners();
-  }
-
-  void goBack() {
-    // Logic for going back in navigation history
-    notifyListeners();
-  }
-
-  // Widget? getCurrentPage(BuildContext context) {
-  //   if (_selectedItemId == null) return const HomePage();
-  //
-  //   final MenuItemModel? item = findItemById(_selectedItemId!);
-  //   if (item == null) return const HomePage();
-  //
-  //   // اگر صفحه از قبل ساخته شده، برگردون
-  //   if (_generatedPages.containsKey(_selectedItemId!)) {
-  //     return _generatedPages[_selectedItemId!];
-  //   }
-  //
-  //   // اولویت با page مستقیم
-  //   if (item.page != null) {
-  //     _generatedPages[_selectedItemId!] = item.page!;
-  //     return item.page;
-  //   }
-  //
-  //   // اگر routeName داره
-  //   if (item.routeName != null && item.routeName!.isNotEmpty) {
-  //     final Widget page = getPageByRout(item.routeName!);
-  //     _generatedPages[_selectedItemId!] = page;
-  //     return page;
-  //   }
-  //   // اولویت با pageBuilder است
-  //   if (item.page != null) {
-  //     return item.page;
-  //   }
-  //
-  //   // سپس با page مستقیم
-  //   if (item.page != null) {
-  //     return item.page!;
-  //   }
-  //
-  //   final Widget defaultPage = getPageByRout('home');
-  //   _generatedPages[_selectedItemId!] = defaultPage;
-  //   return defaultPage;
-  // }
-
   RouteEvent? _mapRouteToEvent(String routeName) {
     switch (routeName) {
-      case '/login':
-      // return LoginModuleShownEvent(
-      //   _netMode,
-      //   _currentLocale,
-      //   _deviceToken ?? '',
-      // );
       case '/erpApp':
         return ErpShownEvent();
-
       default:
         return null;
     }
   }
 
-  bool checkIsLogin() {
-    // if (_selectedItemId == null ||
-    //     selectedItem == null ||
-    //     !selectedItem!.routeName!.contains('signIn')) {
-    //   return false;
-    // }
-    return true;
-  }
-
-  // FutureOr<void> loadMenu() async {
-  //   if (_isMenuLoading) return;
-  //
-  //   _errorMessage = null;
-  //   notifyListeners();
-  //
-  //   try {
-  //     // دریافت منو از سرور
-  //     // توجه: باید MenuRepository را در injection_container ثبت کنید
-  //     final MenuRemoteDatasource menuRepo = sl.get<MenuRemoteDatasource>();
-  //     final List<MenuItem> serverItems = await menuRepo.getMenuItems();
-  //     final List<MenuItemModel> convertedItems = serverItems
-  //         .map((MenuItem item) => MenuItemModel.fromMenuItem(item))
-  //         .toList();
-  //     for (final MenuItemModel item in convertedItems) {
-  //       _assignPageToMenuItem(item);
-  //     }
-  //     _menuItemModels = convertedItems;
-  //     clearPageCache(); // کش صفحات رو پاک کن
-  //   } catch (e) {
-  //     _errorMessage = 'خطا در دریافت منو: $e';
-  //     // می‌توانید منوی پیش‌فرض را بارگیری کنید
-  //     _loadDefaultMenu();
-  //   } finally {
-  //     _isMenuLoading = false;
-  //     notifyListeners();
-  //   }
-  // }
-
-  Future<void> showMyDialog(BuildContext context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('AlertDialog Title'),
-          content: const SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('This is a demo alert dialog.'),
-                Text('Would you like to approve of this message?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Approve'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void setNetworkMod(int mode) {
-    _netMode = mode;
+  void toggleExpanded(String itemId) {
+    _expandedStates[itemId] = !isExpanded(itemId);
     notifyListeners();
   }
 
-  void toggleSidebar() {
-    _sidebarCollapsed = !_sidebarCollapsed;
-    notifyListeners();
-  }
+  void selectItem(String itemId, {bool closeDrawer = true}) {}
 
-  void sidebarManually(bool state) {
-    if (_sidebarCollapsed != state) {
-      _sidebarCollapsed = state;
-      notifyListeners();
+  // ==================== OPERATION MANAGEMENT ====================
+  void registerPendingOperation(Completer<void> completer) {
+    if (_isProcessingSignOut) {
+      completer.completeError('Operation cancelled due to sign out');
+      return;
     }
+    _pendingOperations.add(completer);
   }
 
-  void setSidebarCollapsed(bool collapsed) {
-    _sidebarCollapsed = collapsed;
-    notifyListeners();
+  void unregisterPendingOperation(Completer<void> completer) {
+    _pendingOperations.remove(completer);
   }
 
+  // ==================== USER & AUTH ====================
   void changeToLogin() {
     _isLogin = true;
     notifyListeners();
@@ -257,7 +266,6 @@ class AppNotifier extends ChangeNotifier {
     emit(LoginModuleUserLoggedOutEvent());
   }
 
-  // ==================== USER METHODS ====================
   void updateUserInfo({String? name, String? email, String? role}) {
     _userName = name ?? _userName;
     _userEmail = email ?? _userEmail;
@@ -275,6 +283,7 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ==================== UI STATE ====================
   void resetAll() {
     _expandedStates.clear();
     _selectedItemId = null;
@@ -286,6 +295,7 @@ class AppNotifier extends ChangeNotifier {
     _userName = null;
     _userEmail = null;
     _userRole = null;
+    clearPageCache();
     notifyListeners();
   }
 
@@ -306,7 +316,7 @@ class AppNotifier extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
 
-  bool get isPopop => _isPopop;
+  bool get isPopup => _isPopup;
 
   bool get isMenuLoading => _isMenuLoading;
 
@@ -318,13 +328,13 @@ class AppNotifier extends ChangeNotifier {
 
   String? get currentRoute => _currentRoute;
 
-  // Helper methods
+  NavButtonTabBarMode get selectedTab => _selectedTab;
 
   bool isExpanded(String itemId) => _expandedStates[itemId] ?? false;
 
   bool isSelected(String itemId) => _selectedItemId == itemId;
 
-  // ==================== THEME METHODS ====================
+  // ==================== THEME & UI ====================
   void toggleTheme() {
     _themeConfig = _themeConfig.copyWith(
       localMode: _currentLocale,
@@ -338,58 +348,80 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setDeviceToken(String token) {
-    _deviceToken = token;
-    notifyListeners();
-  }
-
   void setThemeMode(ThemeMode mode) async {
     await ThemeManager.setTheme(mode, persist: true);
     _themeConfig = ThemeManager();
     notifyListeners();
   }
 
-  void updatePrimaryColor(Color color) {
-    _themeConfig = _themeConfig.copyWith(primaryColor: color);
+  // ... بقیه متدهای theme و UI
+}
+
+// ==================== میکسین برای CoreDto ====================
+mixin MicroMixin<T extends CoreDto<E>, E extends Enum> on AppNotifier {
+  T? _dynamicPageBuilderSource;
+  Map<NavButtonTabBarMode, T>? _allDynamicPageBuilderSource;
+
+  void registerDynamicSource(T source) {
+    _dynamicPageBuilderSource = source;
     notifyListeners();
   }
 
-  void updateSecondaryColor(Color color) {
-    _themeConfig = _themeConfig.copyWith(secondaryColor: color);
+  void clearDynamicSource() {
+    _dynamicPageBuilderSource = null;
     notifyListeners();
   }
 
-  // ==================== UI STATE METHODS ====================
-  void toggleDrawer() {
-    _isDrawerOpen = !_isDrawerOpen;
+  void setAllDynamicPageBuilderSource(Map<NavButtonTabBarMode, T> source) {
+    _allDynamicPageBuilderSource = source;
     notifyListeners();
   }
 
-  void setDrawerOpen(bool isOpen) {
-    _isDrawerOpen = isOpen;
-    notifyListeners();
-  }
+  T? get dynamicSource => _dynamicPageBuilderSource;
 
-  void setLoading(bool loading) {
-    _isLoading = loading;
-    if (!loading) {
-      _errorMessage = null;
+  Map<NavButtonTabBarMode, T>? get allDynamicPageBuilderSource =>
+      _allDynamicPageBuilderSource;
+
+  @override
+  Widget createRawPage(NavButtonTabBarMode tab) {
+    // 1. Try all dynamic builders
+    if (_allDynamicPageBuilderSource != null) {
+      final builder = _allDynamicPageBuilderSource![tab];
+      if (builder != null) {
+        final content = _getContentFromBuilder(builder, tab);
+        if (content != null) return content;
+      }
     }
-    notifyListeners();
+
+    // 2. Try single dynamic source
+    if (_dynamicPageBuilderSource != null) {
+      final content = _getContentFromBuilder(_dynamicPageBuilderSource!, tab);
+      if (content != null) return content;
+    }
+
+    // 3. Fallback to default
+    return super.createRawPage(tab);
   }
 
-  void showPopop(String? message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
+  Widget? _getContentFromBuilder(T builder, NavButtonTabBarMode tab) {
+    // فرض می‌کنیم CoreDto متدی به نام getPage یا onParentNav دارد
+    // بسته به ساختار واقعی CoreDto، اینجا باید منطق را تنظیم کنید
 
-  void setError(String? message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
+    // اگر CoreDto.getPage دارد:
+    // return builder.getPage(tab);
 
-  void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    // اگر CoreDto.onParentNav دارد:
+    // return builder.onParentNav?.call(tab);
+
+    // اگر هیچکدام نیست:
+    return null;
+  }
+}
+
+// ==================== کلاس تخصصی ====================
+class MicroAppNotifier<T extends CoreDto<E>, E extends Enum> extends AppNotifier
+    with MicroMixin<T, E> {
+  MicroAppNotifier([T? src]) {
+    if (src != null) registerDynamicSource(src);
   }
 }

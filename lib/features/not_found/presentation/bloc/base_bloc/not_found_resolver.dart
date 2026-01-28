@@ -1,14 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:micro_app_core/index.dart';
 import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
 import 'package:micro_app_core/services/routing/routing_transitions.dart';
 import 'package:micro_app_core/src/micro_app.dart' as microApp;
-import 'package:micro_app_core/src/micro_core_utils.dart';
 
 import '../../not_found_page.dart';
 import 'not_found_events.dart';
 import 'not_found_inject.dart';
 
-class NotFoundResolver implements microApp.MicroApp {
+class NotFoundResolver extends microApp.MicroApp {
+  NotFoundResolver() : super(SignInCoreModel(onLogIn: () {}, onLogOut: () {})) {
+    // مقداردهی initDatas در بدنه constructor
+    initDatas = SignInCoreModel(onLogIn: () {}, onLogOut: () {});
+  }
   @override
   String get microAppName => "/notFound";
 
@@ -42,4 +46,12 @@ class NotFoundResolver implements microApp.MicroApp {
 
   @override
   TransitionType? get transitionType => TransitionType.fade;
+
+  // @override
+  // CoreDto<Object> initDatas = {};
+
+  @override
+  void callCustom(Object e) {
+    // TODO: implement callCustom
+  }
 }

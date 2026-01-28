@@ -20,6 +20,7 @@ dependencies:
     path: ../modules/login_module
   models_package:
     path: ../packages/models_package
+  skeletonizer: ^2.1.2
 
 dev_dependencies:
   flutter_test:

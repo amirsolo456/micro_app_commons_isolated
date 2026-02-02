@@ -8,40 +8,37 @@ import 'package:micro_app_core/index.dart';
 import 'launcher_inject.dart';
 
 class LauncherResolver extends MicroApp {
-  LauncherResolver() : super(SignInCoreModel(onLogIn: () {}, onLogOut: () {})) {
-    initDatas = SignInCoreModel(onLogIn: () {}, onLogOut: () {});
+  LauncherResolver() : super(LauncherCoreModel()) {
+    initDatas = LauncherCoreModel(  );
   }
 
   @override
-  String get microAppName => "/notFound";
+  String get microAppName => "/${MicroAppsName.notFoundPage}";
 
   @override
   Map<String, WidgetBuilderArgs> get routes => <String, WidgetBuilderArgs>{
     microAppName: (BuildContext context, Object? args) => LauncherPage(),
+
   };
 
   @override
   void initEventListeners() {
-    CustomEventBus.on<GotoErpAppEvent>((event) {
-      // we can use events to navigate as well.
-      // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
-    });
-    CustomEventBus.on<GotoLoginEvent>((event) {
-      // we can use events to navigate as well.
-      // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
-    });
-    CustomEventBus.on<GotoStorageEvent>((event) {
-      // we can use events to navigate as well.
-      // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
-    });
-    CustomEventBus.on<GotoSalesEvent>((event) {
-      // we can use events to navigate as well.
-      // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
-    });
+
+    // CustomEventBus.on<GotoLoginEvent>((event) {
+    //   // we can use events to navigate as well.
+    //   // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
+    //   print('LOGGED OUT');
+    // });
+    // CustomEventBus.on<GotoStorageEvent>((event) {
+    //   // we can use events to navigate as well.
+    //   // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
+    //   print('LOGGED OUT');
+    // });
+    // CustomEventBus.on<GotoSalesEvent>((event) {
+    //   // we can use events to navigate as well.
+    //   // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
+    //   print('LOGGED OUT');
+    // });
   }
 
   @override

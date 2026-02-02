@@ -2,12 +2,12 @@
 import 'dart:async';
 import 'dart:core';
 
+import 'package:erp_app/index.dart';
 import 'package:erp_app/micro_app/erp_events.dart';
 import 'package:flutter/material.dart';
 import 'package:login_module/micro_app/login_module_events.dart';
 import 'package:micro_app_core/index.dart';
 import 'package:micro_app_core/services/routing/route_events.dart';
-import 'package:micro_app_core/utils/models/core_dto.dart';
 import 'package:models_package/index.dart';
 import 'package:resources_package/Resources/Theme/theme_manager.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -28,8 +28,9 @@ class AppNotifier extends ChangeNotifier {
   final bool _isMenuLoading = false;
 
   String? _errorMessage;
-  ThemeManager _themeConfig = ThemeManager();
+  AppTheme _themeConfig = AppTheme();
   String? _selectedItemId;
+
   // ignore: prefer_final_fields
   bool _sidebarCollapsed = false;
   bool _isDrawerOpen = false;
@@ -38,17 +39,20 @@ class AppNotifier extends ChangeNotifier {
   Map<int, Widget> get pageCache => Map.from(_pageCache);
 
   bool _isLoading = false;
+
   // ignore: unused_field
-  int _netMode = 0;
+  final int _netMode = 0;
   final bool _isPopup = false;
   static final Map<String, bool> _defValue = {'first': false};
   final Map<String, bool> _isListRoute = _defValue;
   final Map<String, bool> _isFormRoute = _defValue;
+
   // ignore: unused_field
   final List<String> _errors = [];
   String? _userName;
   String? _userEmail;
   String? _userRole;
+
   // ignore: unused_field
   String? _deviceToken;
   Locale _currentLocale = Locale('fa');
@@ -74,7 +78,8 @@ class AppNotifier extends ChangeNotifier {
   // ==================== PAGE MANAGEMENT ====================
   @protected
   Widget createRawPage(NavButtonTabBarMode tab) {
-    return _defaultPage(tab);
+    return  sl<ErpResolver>().initDatas.getPage(tab) ?? Text('a');
+
   }
 
   void changePage(
@@ -288,7 +293,7 @@ class AppNotifier extends ChangeNotifier {
     _expandedStates.clear();
     _selectedItemId = null;
     _currentRoute = '/home';
-    _themeConfig = ThemeManager();
+    _themeConfig = AppTheme();
     _isDrawerOpen = false;
     _isLoading = false;
     _errorMessage = null;
@@ -304,7 +309,7 @@ class AppNotifier extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  ThemeManager get themeConfig => _themeConfig;
+  AppTheme get themeConfig => _themeConfig;
 
   bool get isSidebarCollapsed => _sidebarCollapsed;
 
@@ -349,8 +354,8 @@ class AppNotifier extends ChangeNotifier {
   }
 
   void setThemeMode(ThemeMode mode) async {
-    await ThemeManager.setTheme(mode, persist: true);
-    _themeConfig = ThemeManager();
+    await AppTheme.setTheme(mode, persist: true);
+    _themeConfig = AppTheme();
     notifyListeners();
   }
 

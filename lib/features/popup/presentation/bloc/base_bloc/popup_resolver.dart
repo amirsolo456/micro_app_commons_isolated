@@ -3,16 +3,13 @@ import 'package:micro_app_commons/features/popup/presentation/bloc/base_bloc/pop
 import 'package:micro_app_commons/features/popup/presentation/bloc/base_bloc/popup_inject.dart';
 import 'package:micro_app_commons/features/popup/presentation/popup_page.dart';
 import 'package:micro_app_core/index.dart';
-import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
-import 'package:micro_app_core/services/routing/routing_transitions.dart';
-import 'package:micro_app_core/src/micro_app.dart' as microApp;
+
 import 'package:resources_package/l10n/app_localizations.dart';
 
-class PopupResolver extends microApp.MicroApp {
-  PopupResolver() : super(SignInCoreModel(onLogIn: () {}, onLogOut: () {})) {
-    // مقداردهی initDatas در بدنه constructor
-    initDatas = SignInCoreModel(onLogIn: () {}, onLogOut: () {});
-  }
+class PopupResolver extends MicroApp<PopupCoreModel, Enum> {
+
+  PopupResolver()
+      : super(PopupCoreModel()) ;
   @override
   String get microAppName => "/popup";
 

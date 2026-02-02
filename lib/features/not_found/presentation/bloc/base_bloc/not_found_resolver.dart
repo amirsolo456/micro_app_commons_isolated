@@ -8,11 +8,8 @@ import '../../not_found_page.dart';
 import 'not_found_events.dart';
 import 'not_found_inject.dart';
 
-class NotFoundResolver extends microApp.MicroApp {
-  NotFoundResolver() : super(SignInCoreModel(onLogIn: () {}, onLogOut: () {})) {
-    // مقداردهی initDatas در بدنه constructor
-    initDatas = SignInCoreModel(onLogIn: () {}, onLogOut: () {});
-  }
+class NotFoundResolver extends  MicroApp {
+  NotFoundResolver() : super(NotFoundCoreModel());
   @override
   String get microAppName => "/notFound";
 

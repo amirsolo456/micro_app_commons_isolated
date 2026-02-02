@@ -28,7 +28,7 @@ class AppNotifier extends ChangeNotifier {
   final bool _isMenuLoading = false;
 
   String? _errorMessage;
-  ThemeManager _themeConfig = ThemeManager();
+  AppTheme _themeConfig = AppTheme();
   String? _selectedItemId;
   // ignore: prefer_final_fields
   bool _sidebarCollapsed = false;
@@ -288,7 +288,7 @@ class AppNotifier extends ChangeNotifier {
     _expandedStates.clear();
     _selectedItemId = null;
     _currentRoute = '/home';
-    _themeConfig = ThemeManager();
+    _themeConfig = AppTheme();
     _isDrawerOpen = false;
     _isLoading = false;
     _errorMessage = null;
@@ -304,7 +304,7 @@ class AppNotifier extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  ThemeManager get themeConfig => _themeConfig;
+  AppTheme get themeConfig => _themeConfig;
 
   bool get isSidebarCollapsed => _sidebarCollapsed;
 
@@ -349,8 +349,8 @@ class AppNotifier extends ChangeNotifier {
   }
 
   void setThemeMode(ThemeMode mode) async {
-    await ThemeManager.setTheme(mode, persist: true);
-    _themeConfig = ThemeManager();
+    await AppTheme.setTheme(mode, persist: true);
+    _themeConfig = AppTheme();
     notifyListeners();
   }
 

@@ -2,12 +2,12 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:erp_app/micro_app/erp_events.dart';
+ import 'package:erp_app/index.dart';
+
 import 'package:flutter/material.dart';
 import 'package:login_module/micro_app/login_module_events.dart';
 import 'package:micro_app_core/index.dart';
 import 'package:micro_app_core/services/routing/route_events.dart';
-import 'package:micro_app_core/utils/models/core_dto.dart';
 import 'package:models_package/index.dart';
 import 'package:resources_package/Resources/Theme/theme_manager.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -72,11 +72,13 @@ class AppNotifier extends ChangeNotifier {
   }
 
   // ==================== PAGE MANAGEMENT ====================
-  @protected
+  // @protected
   Widget createRawPage(NavButtonTabBarMode tab) {
-    return _defaultPage(tab);
+    return sl<ErpResolver>().initDatas.getPage(tab) ?? _defaultPage(tab);
   }
-
+  Widget _defaultPage(NavButtonTabBarMode tab) {
+    return Center(child: Text('صفحه ${tab.value}'));
+  }
   void changePage(
     PageType pageType, {
     String? route,
@@ -104,15 +106,8 @@ class AppNotifier extends ChangeNotifier {
 
     _isProcessingSignOut = true;
 
-    // NotifService().signOut(context, reason: 'خروج از ERP', toParent: true);
 
-    // ignore: unused_local_variable, no_leading_underscores_for_local_identifiers
-    var _isSignOut = true;
     notifyListeners();
-  }
-
-  Widget _defaultPage(NavButtonTabBarMode tab) {
-    return Center(child: Text('صفحه ${tab.value}'));
   }
 
   Widget getPage(NavButtonTabBarMode tab, {bool forceRefresh = false}) {
@@ -354,7 +349,6 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ... بقیه متدهای theme و UI
 }
 
 // ==================== میکسین برای CoreDto ====================
@@ -384,7 +378,6 @@ mixin MicroMixin<T extends CoreDto<E>, E extends Enum> on AppNotifier {
 
   @override
   Widget createRawPage(NavButtonTabBarMode tab) {
-    // 1. Try all dynamic builders
     if (_allDynamicPageBuilderSource != null) {
       final builder = _allDynamicPageBuilderSource![tab];
       if (builder != null) {
@@ -404,16 +397,7 @@ mixin MicroMixin<T extends CoreDto<E>, E extends Enum> on AppNotifier {
   }
 
   Widget? _getContentFromBuilder(T builder, NavButtonTabBarMode tab) {
-    // فرض می‌کنیم CoreDto متدی به نام getPage یا onParentNav دارد
-    // بسته به ساختار واقعی CoreDto، اینجا باید منطق را تنظیم کنید
 
-    // اگر CoreDto.getPage دارد:
-    // return builder.getPage(tab);
-
-    // اگر CoreDto.onParentNav دارد:
-    // return builder.onParentNav?.call(tab);
-
-    // اگر هیچکدام نیست:
     return null;
   }
 }

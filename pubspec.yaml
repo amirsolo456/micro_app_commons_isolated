@@ -20,8 +20,10 @@ dependencies:
     path: ../modules/login_module
   models_package:
     path: ../packages/models_package
+  ui_components_package:
+    path: ../packages/ui_components_package
   skeletonizer: ^2.1.2
-
+  toastification: ^3.0.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

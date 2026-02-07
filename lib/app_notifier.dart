@@ -2,7 +2,7 @@
 import 'dart:async';
 import 'dart:core';
 
- import 'package:erp_app/index.dart';
+import 'package:erp_app/index.dart';
 
 import 'package:flutter/material.dart';
 import 'package:login_module/micro_app/login_module_events.dart';
@@ -30,6 +30,7 @@ class AppNotifier extends ChangeNotifier {
   String? _errorMessage;
   AppTheme _themeConfig = AppTheme();
   String? _selectedItemId;
+
   // ignore: prefer_final_fields
   bool _sidebarCollapsed = false;
   bool _isDrawerOpen = false;
@@ -38,17 +39,22 @@ class AppNotifier extends ChangeNotifier {
   Map<int, Widget> get pageCache => Map.from(_pageCache);
 
   bool _isLoading = false;
+
   // ignore: unused_field
-  int _netMode = 0;
+  final int _netMode = 0;
   final bool _isPopup = false;
   static final Map<String, bool> _defValue = {'first': false};
   final Map<String, bool> _isListRoute = _defValue;
+
+  String get getListRoute => _isListRoute.keys.last ?? '';
   final Map<String, bool> _isFormRoute = _defValue;
+  String get getFormRoute => _isFormRoute.keys.last ?? '';
   // ignore: unused_field
   final List<String> _errors = [];
   String? _userName;
   String? _userEmail;
   String? _userRole;
+
   // ignore: unused_field
   String? _deviceToken;
   Locale _currentLocale = Locale('fa');
@@ -76,9 +82,11 @@ class AppNotifier extends ChangeNotifier {
   Widget createRawPage(NavButtonTabBarMode tab) {
     return sl<ErpResolver>().initDatas.getPage(tab) ?? _defaultPage(tab);
   }
+
   Widget _defaultPage(NavButtonTabBarMode tab) {
     return Center(child: Text('صفحه ${tab.value}'));
   }
+
   void changePage(
     PageType pageType, {
     String? route,
@@ -92,10 +100,12 @@ class AppNotifier extends ChangeNotifier {
     } else if (route != null &&
         route != '' &&
         pageType == PageType.listGenerator) {
+      _selectedTab = NavButtonTabBarMode.erpGenericListTabMode;
       _isListRoute[route] = true;
     } else if (route != null &&
         route != '' &&
         pageType == PageType.formGenerator) {
+      _selectedTab = NavButtonTabBarMode.erpGenericFormTabMode;
       _isFormRoute[route] = true;
     } else {}
     notifyListeners();
@@ -105,7 +115,6 @@ class AppNotifier extends ChangeNotifier {
     if (_isProcessingSignOut) return;
 
     _isProcessingSignOut = true;
-
 
     notifyListeners();
   }
@@ -348,7 +357,6 @@ class AppNotifier extends ChangeNotifier {
     _themeConfig = AppTheme();
     notifyListeners();
   }
-
 }
 
 // ==================== میکسین برای CoreDto ====================
@@ -397,7 +405,6 @@ mixin MicroMixin<T extends CoreDto<E>, E extends Enum> on AppNotifier {
   }
 
   Widget? _getContentFromBuilder(T builder, NavButtonTabBarMode tab) {
-
     return null;
   }
 }

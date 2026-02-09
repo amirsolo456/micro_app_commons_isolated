@@ -28,7 +28,7 @@ class AppNotifier extends ChangeNotifier {
   final bool _isMenuLoading = false;
 
   String? _errorMessage;
-  AppTheme _themeConfig = AppTheme();
+  AppTheme _themeConfig = AppTheme.light();
   String? _selectedItemId;
 
   // ignore: prefer_final_fields
@@ -48,7 +48,9 @@ class AppNotifier extends ChangeNotifier {
 
   String get getListRoute => _isListRoute.keys.last ?? '';
   final Map<String, bool> _isFormRoute = _defValue;
+
   String get getFormRoute => _isFormRoute.keys.last ?? '';
+
   // ignore: unused_field
   final List<String> _errors = [];
   String? _userName;
@@ -292,7 +294,7 @@ class AppNotifier extends ChangeNotifier {
     _expandedStates.clear();
     _selectedItemId = null;
     _currentRoute = '/home';
-    _themeConfig = AppTheme();
+    _themeConfig = AppTheme.light();
     _isDrawerOpen = false;
     _isLoading = false;
     _errorMessage = null;
@@ -308,7 +310,7 @@ class AppNotifier extends ChangeNotifier {
 
   String? get errorMessage => _errorMessage;
 
-  AppTheme get themeConfig => _themeConfig;
+  AppTheme get themeConfig => AppTheme.light();
 
   bool get isSidebarCollapsed => _sidebarCollapsed;
 
@@ -352,9 +354,14 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+  Locale currentLocal() {
+    // notifyListeners();
+    return _currentLocale;
+  }
+
   void setThemeMode(ThemeMode mode) async {
     await AppTheme.setTheme(mode, persist: true);
-    _themeConfig = AppTheme();
+    _themeConfig = AppTheme.light();
     notifyListeners();
   }
 }

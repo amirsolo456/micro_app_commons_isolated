@@ -1,3 +1,4 @@
+import 'package:erp_app/core/network/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:micro_app_commons/features/not_found/presentation/bloc/base_bloc/not_found_resolver.dart';
 import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
@@ -70,6 +71,8 @@ class _LauncherPageState extends State<LauncherPage> {
       ),
     );
   }
+
+
 
   void onMozeTab() {
     CustomEventBus.emit(
@@ -368,80 +371,6 @@ class _LauncherPageState extends State<LauncherPage> {
     );
   }
 
-  // @override
-  // Widget build(BuildContext context) {
-  //   final options = <_AppOption>[
-  //     // _AppOption('ERP App', Icons.business, () {
-  //     //   return erp_app.buildERPApp(loginDatas: loginSession);
-  //     // }),
-  //     _AppOption(
-  //       'Other',
-  //       Icons.widgets,
-  //       () => const Scaffold(body: Center(child: Text('Other App'))),
-  //     ),
-  //   ];
-  //   return Scaffold(
-  //     appBar: AppBar(title: const Text('Super App Launcher')),
-  //     body: GridView.count(
-  //       crossAxisCount: 2,
-  //       padding: const EdgeInsets.all(16),
-  //       crossAxisSpacing: 16,
-  //       mainAxisSpacing: 16,
-  //       children: options.map((opt) {
-  //         return GestureDetector(
-  //           onTap: () {
-  //             Navigator.push(
-  //               context,
-  //               MaterialPageRoute(
-  //                 builder: (_) => MultiBlocProvider(
-  //                   providers: [
-  //                     //   //Ehsan Chage
-  //                     //   BlocProvider(
-  //                     //     create: (_) => DefaultSelectionBloc(sl<ApiSettings>()),
-  //                     //   ),
-  //                     //
-  //                     //   //Ehsan Chage
-  //                     //   BlocProvider<PlaceBloc>(create: (_) => sl<PlaceBloc>()),
-  //                     //   BlocProvider<SelectCashierBloc>(
-  //                     //     create: (_) => sl<SelectCashierBloc>(),
-  //                     //   ),
-  //                     //   BlocProvider<SelectCurrencyBloc>(
-  //                     //     create: (_) => sl<SelectCurrencyBloc>(),
-  //                     //   ),
-  //                     //   BlocProvider<SelectYearBloc>(
-  //                     //     create: (_) => sl<SelectYearBloc>(),
-  //                     //   ),
-  //                     //   BlocProvider<LanguageBloc>(
-  //                     //     create: (_) => sl<LanguageBloc>(),
-  //                     //   ),
-  //                   ],
-  //                   child: opt
-  //                       .builder(), // اینجا DefaultPage یا صفحه ERP App فراخوانی میشه
-  //                 ),
-  //               ),
-  //             );
-  //
-  //             //Ehsan Change
-  //           },
-  //           child: Card(
-  //             elevation: 4,
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(12),
-  //             ),
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Icon(opt.icon, size: 50, color: Colors.blue),
-  //                 const SizedBox(height: 8),
-  //                 Text(opt.name, style: const TextStyle(fontSize: 18)),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       }).toList(),
-  //     ),
-  //   );
-  // }
 }
 
 class _FeatureBox extends StatelessWidget {

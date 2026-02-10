@@ -21,12 +21,10 @@ class NotFoundResolver extends  MicroApp {
     CustomEventBus.on<PageNotFoundEvent>((event) {
       // we can use events to navigate as well.
       // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
     });
     CustomEventBus.on<ShortKeyNotFoundEvent>((event) {
       // we can use events to navigate as well.
       // Routing.pushNamed<UserLoggedOutEvent>(Routes.SignIn);
-      print('LOGGED OUT');
     });
   }
 

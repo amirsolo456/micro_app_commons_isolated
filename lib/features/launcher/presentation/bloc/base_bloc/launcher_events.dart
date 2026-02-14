@@ -12,6 +12,7 @@ import 'package:models_package/Base/login_module.dart';
 //   PageNotFoundEvents(this.pageNotFoundEvent);
 // }
 class GotoLoginEvent extends RouteEvent {}
+class ShownLauncherEvent extends RouteEvent {}
 
 class GotoErpAppEvent extends RouteEvent {
   final LoginModuleResult result;
@@ -33,6 +34,7 @@ class LauncherCustomEvents extends RouteEvent {
   RouteEvent gotoLoginEvent() => GotoLoginEvent();
 
   RouteEvent gotoVisitorsEvent() => GotoVisitorsEvent();
+  RouteEvent shownLauncherEvent() => ShownLauncherEvent();
 
   RouteEvent gotoStorageEvent() => GotoStorageEvent();
 

@@ -99,7 +99,10 @@ class AppNotifier extends ChangeNotifier {
       if (tab != null) {
         _selectedTab = tab;
       }
-    } else if (route != null &&
+    }else if(pageType == PageType.common){
+      _selectedTab = tab ?? NavButtonTabBarMode.erpDashboardTabMode;
+    }
+    else if (route != null &&
         route != '' &&
         pageType == PageType.listGenerator) {
       _selectedTab = NavButtonTabBarMode.erpGenericListTabMode;

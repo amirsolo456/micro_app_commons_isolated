@@ -1,4 +1,3 @@
-import 'package:erp_app/core/network/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:micro_app_commons/features/not_found/presentation/bloc/base_bloc/not_found_resolver.dart';
 import 'package:micro_app_core/services/custom_event_bus/custom_event_bus.dart';
@@ -96,11 +95,11 @@ class _LauncherPageState extends State<LauncherPage> {
               // AppBar سفارشی
               Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.transparent,
-                    child: Icon(Icons.person_outline, color: Colors.black54),
-                  ),
+                  // const CircleAvatar(
+                  //   radius: 18,
+                  //   backgroundColor: Colors.transparent,
+                  //   child: Icon(Icons.person_outline, color: Colors.black54),
+                  // ),
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
@@ -329,10 +328,10 @@ class _LauncherPageState extends State<LauncherPage> {
                 ),
                 child: Row(
                   children: [
-                    const CircleAvatar(
-                      backgroundColor: Colors.black,
-                      child: Icon(Icons.arrow_back, color: Colors.white),
-                    ),
+                    // const CircleAvatar(
+                    //   backgroundColor: Colors.black,
+                    //   child: Icon(Icons.arrow_back, color: Colors.white),
+                    // ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

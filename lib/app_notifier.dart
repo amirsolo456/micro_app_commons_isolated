@@ -3,14 +3,12 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:erp_app/index.dart';
-
 import 'package:flutter/material.dart';
 import 'package:login_module/micro_app/login_module_events.dart';
 import 'package:micro_app_core/index.dart';
 import 'package:micro_app_core/services/routing/route_events.dart';
 import 'package:models_package/index.dart';
 import 'package:resources_package/Resources/Theme/theme_manager.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 // ==================== کلاس پایه AppNotifier ====================
 class AppNotifier extends ChangeNotifier {
@@ -40,18 +38,22 @@ class AppNotifier extends ChangeNotifier {
 
   bool _isLoading = false;
 
-  // ignore: unused_field
+  GenericModels? _pageArgsGeneric;
+
+  GenericModels? get pageArgsGeneric => _pageArgsGeneric;
+  Map<String, dynamic>? _pageArgs;
+
+  Map<String, dynamic>? get pageArgs => _pageArgs;
   final int _netMode = 0;
   final bool _isPopup = false;
   static final Map<String, bool> _defValue = {'first': false};
   final Map<String, bool> _isListRoute = _defValue;
 
-  String get getListRoute => _isListRoute.keys.last ?? '';
+  String get getListRoute => _isListRoute.keys.last;
   final Map<String, bool> _isFormRoute = _defValue;
 
-  String get getFormRoute => _isFormRoute.keys.last ?? '';
+  String get getFormRoute => _isFormRoute.keys.last;
 
-  // ignore: unused_field
   final List<String> _errors = [];
   String? _userName;
   String? _userEmail;
@@ -91,18 +93,16 @@ class AppNotifier extends ChangeNotifier {
 
   void changePage(
     PageType pageType, {
-    String? route,
     NavButtonTabBarMode? tab,
+    String? route,
+    Map<String, dynamic>? args,
   }) {
-    // _pageType = pageType; // اگر فیلد _pageType را دارید
+    _pageArgs = args;
     if (pageType == PageType.tabBar) {
       if (tab != null) {
         _selectedTab = tab;
       }
-    }else if(pageType == PageType.common){
-      _selectedTab = tab ?? NavButtonTabBarMode.erpDashboardTabMode;
-    }
-    else if (route != null &&
+    } else if (route != null &&
         route != '' &&
         pageType == PageType.listGenerator) {
       _selectedTab = NavButtonTabBarMode.erpGenericListTabMode;
@@ -116,15 +116,22 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
+   void _clearArgs() => _pageArgs = null;
+
   Future<void> signOut(BuildContext context, {bool force = false}) async {
     if (_isProcessingSignOut) return;
 
     _isProcessingSignOut = true;
-
+    _clearArgs();
     notifyListeners();
   }
 
-  Widget getPage(NavButtonTabBarMode tab, {bool forceRefresh = false}) {
+  /*
+  Widget getPage(
+    NavButtonTabBarMode tab, {
+    bool forceRefresh = false,
+    Map<String, dynamic>? args,
+  }) {
     if (_isProcessingSignOut) {
       return _buildSignOutScreen();
     }
@@ -162,34 +169,34 @@ class AppNotifier extends ChangeNotifier {
     _activateSkeleton(tab.value);
 
     return _wrapWithSkeleton(rawPage, tab.value, showSkeleton: true);
-  }
+  }*/
 
   // ==================== SKELETON & CACHE HELPERS ====================
-  void _activateSkeleton(int tabValue) {
-    _showSkeleton[tabValue] = true;
-    _skeletonTimers[tabValue]?.cancel();
+  // void _activateSkeleton(int tabValue) {
+  //   _showSkeleton[tabValue] = true;
+  //   _skeletonTimers[tabValue]?.cancel();
+  //
+  //   final timer = Timer(const Duration(milliseconds: 400), () {
+  //     if (!_isProcessingSignOut) {
+  //       _showSkeleton[tabValue] = false;
+  //       notifyListeners();
+  //     }
+  //   });
+  //
+  //   _skeletonTimers[tabValue] = timer;
+  // }
 
-    final timer = Timer(const Duration(milliseconds: 400), () {
-      if (!_isProcessingSignOut) {
-        _showSkeleton[tabValue] = false;
-        notifyListeners();
-      }
-    });
-
-    _skeletonTimers[tabValue] = timer;
-  }
-
-  Widget _wrapWithSkeleton(
-    Widget page,
-    int tabValue, {
-    required bool showSkeleton,
-  }) {
-    return Skeletonizer(
-      containersColor: Colors.white,
-      enabled: showSkeleton && !_isProcessingSignOut,
-      child: page,
-    );
-  }
+  // Widget _wrapWithSkeleton(
+  //   Widget page,
+  //   int tabValue, {
+  //   required bool showSkeleton,
+  // }) {
+  //   return Skeletonizer(
+  //     containersColor: Colors.white,
+  //     enabled: showSkeleton && !_isProcessingSignOut,
+  //     child: page,
+  //   );
+  // }
 
   Widget _buildSignOutScreen() {
     return Scaffold(
@@ -353,7 +360,32 @@ class AppNotifier extends ChangeNotifier {
   }
 
   void setCurrentLocal(Locale locale) {
+    // sl<StorageService>().saveLanguage(language)
     _currentLocale = locale;
+    notifyListeners();
+  }
+
+  void setCurrentYear(int yearId) {
+    // sl<StorageService>().saveLanguage(language)
+    // _currentLocale = locale;
+    notifyListeners();
+  }
+
+  void setCurrentPlace(int placeId) {
+    // sl<StorageService>().saveLanguage(language)
+    // _currentLocale = locale;
+    notifyListeners();
+  }
+
+  void setCurrentCurrency(int currencyId) {
+    // sl<StorageService>().saveLanguage(language)
+    // _currentLocale = locale;
+    notifyListeners();
+  }
+
+  void setCurrentCashier(int cashierId) {
+    // sl<StorageService>().saveLanguage(language)
+    // _currentLocale = locale;
     notifyListeners();
   }
 

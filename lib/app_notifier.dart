@@ -126,77 +126,7 @@ class AppNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  /*
-  Widget getPage(
-    NavButtonTabBarMode tab, {
-    bool forceRefresh = false,
-    Map<String, dynamic>? args,
-  }) {
-    if (_isProcessingSignOut) {
-      return _buildSignOutScreen();
-    }
 
-    // Dashboard tab - special logic
-    if (tab == NavButtonTabBarMode.erpDashboardTabMode) {
-      return const Text('Dashboard');
-    }
-
-    // Check cache
-    if (!forceRefresh &&
-        (tab == NavButtonTabBarMode.skeletion ||
-            _pageCache.containsKey(tab.value))) {
-      final showSkeleton = _showSkeleton[tab.value] ?? false;
-      final cachedPage = _pageCache[tab.value];
-      if (cachedPage != null) {
-        return _wrapWithSkeleton(
-          cachedPage,
-          tab.value,
-          showSkeleton: showSkeleton,
-        );
-      }
-    }
-
-    // Create new page
-    final rawPage = _cacheManager.getOrCreate(
-      tab.value,
-      () => createRawPage(tab),
-    );
-
-    // Cache it
-    _pageCache[tab.value] = rawPage;
-
-    // Activate skeleton
-    _activateSkeleton(tab.value);
-
-    return _wrapWithSkeleton(rawPage, tab.value, showSkeleton: true);
-  }*/
-
-  // ==================== SKELETON & CACHE HELPERS ====================
-  // void _activateSkeleton(int tabValue) {
-  //   _showSkeleton[tabValue] = true;
-  //   _skeletonTimers[tabValue]?.cancel();
-  //
-  //   final timer = Timer(const Duration(milliseconds: 400), () {
-  //     if (!_isProcessingSignOut) {
-  //       _showSkeleton[tabValue] = false;
-  //       notifyListeners();
-  //     }
-  //   });
-  //
-  //   _skeletonTimers[tabValue] = timer;
-  // }
-
-  // Widget _wrapWithSkeleton(
-  //   Widget page,
-  //   int tabValue, {
-  //   required bool showSkeleton,
-  // }) {
-  //   return Skeletonizer(
-  //     containersColor: Colors.white,
-  //     enabled: showSkeleton && !_isProcessingSignOut,
-  //     child: page,
-  //   );
-  // }
 
   Widget _buildSignOutScreen() {
     return Scaffold(

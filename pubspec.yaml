@@ -2,18 +2,17 @@ name: micro_app_commons
 description: "A new Flutter project."
 version: 0.0.1
 publish_to: none
-
+resolution: workspace
 environment:
-  sdk: ^3.10.1
-  flutter: ">=1.17.0"
+  sdk: '^3.10.1'
+  flutter: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
   micro_app_core:
     path: ../micro_app_core
-#  services_package:
-#    path: ../packages/services_package
+
   resources_package:
     path: ../packages/resources_package
   erp_app:
